@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Masmorra Sombria — Escape Room Point and Click</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Decoração: tochas e correntes (puro CSS) -->
+  <div class="tocha tocha-esq" aria-hidden="true"><div class="chama"></div><div class="suporte"></div></div>
+  <div class="tocha tocha-dir" aria-hidden="true"><div class="chama"></div><div class="suporte"></div></div>
+  <div class="corrente corrente-esq" aria-hidden="true">⛓️</div>
+  <div class="corrente corrente-dir" aria-hidden="true">⛓️</div>
+
+  <header>
+    <h1>⛓️ A MASMORRA SOMBRIA ⛓️</h1>
+    <div id="hud">
+      <span id="hud-tempo">⏳ 00:00</span>
+      <span id="hud-sala">Pronto para entrar?</span>
+      <button id="btn-reiniciar-topo" class="btn-mini" title="Reiniciar partida">🔄 Reiniciar</button>
+    </div>
+    <div id="mapa">
+      <span class="etapa" data-sala="1">1 Código</span>
+      <span class="etapa" data-sala="2">2 Enigma</span>
+      <span class="etapa" data-sala="3">3 Chave</span>
+      <span class="etapa" data-sala="4">4 Fuga</span>
+    </div>
+    <!-- Inventário sempre visível (point and click) -->
+    <div id="inventario-bar">
+      <span class="inv-titulo">🎒 Inventário:</span>
+      <div id="inventario-slots">
+        <span class="slot vazio" id="slot-0">— vazio —</span>
+      </div>
+      <span id="inv-dica">Clique num item para selecionar</span>
+    </div>
+  </header>
+
+  <!-- Área de mensagens de feedback -->
+  <div id="toast" class="toast escondido"></div>
+
+  <main>
+    <!-- TELA INICIAL -->
+    <section id="tela-inicio" class="tela ativa">
+      <h2>🏰 Preso na masmorra...</h2>
+      <p class="historia">
+        Dizem que ninguém jamais escapou da <strong>Masmorra Sombria</strong>.
+        Você acordou numa cela úmida, com o som de correntes e o cheiro de mofo.
+        Uma voz ecoa pelas pedras: <em>“Apenas os atentos sairão vivos...”</em>
+      </p>
+      <ol class="regras">
+        <li>🔢 <strong>Sala 1 — O Código Secreto:</strong> clique em pergaminhos, inscrições e objetos para achar o código da fechadura.</li>
+        <li>🗿 <strong>Sala 2 — O Enigma do Guardião:</strong> decifre a charada da estátua e <strong>digite</strong> a resposta.</li>
+        <li>🗝️ <strong>Sala 3 — A Chave Perdida:</strong> vasculhe baús, barris e caixas. A chave de ferro vai para o inventário.</li>
+        <li>🚪 <strong>Sala 4 — A Fuga:</strong> clique na grande porta e <strong>use a chave do inventário</strong> para escapar.</li>
+      </ol>
+      <p class="dica">🖱️ <strong>Como jogar (point and click):</strong> clique/toque nos objetos do cenário. Passe o mouse para ver o brilho. Itens coletados vão para o inventário acima.</p>
+      <button id="btn-iniciar" class="btn-grande">▶️ Iniciar Jogo</button>
+    </section>
+
+    <!-- SALA 1 — O CÓDIGO SECRETO -->
+    <section id="sala-1" class="tela sala">
+      <h2>Sala 1 — O Código Secreto</h2>
+      <p class="objetivo">🔎 Explore a cela clicando em tudo. Reúna os <strong>3 dígitos</strong> e abra a fechadura da porta.</p>
+      <div class="cena">
+        <button class="objeto" data-obj="pergaminho">📜<span>Pergaminho</span><em class="acao">examinar</em></button>
+        <button class="objeto" data-obj="inscricao">🧱<span>Inscrição</span><em class="acao">examinar</em></button>
+        <button class="objeto" data-obj="tocha-sala">🔥<span>Tocha</span><em class="acao">examinar</em></button>
+        <button class="objeto" data-obj="palha">🌾<span>Palha</span><em class="acao">revirar</em></button>
+        <button class="objeto porta" data-obj="porta1">🚪<span>Porta / Fechadura</span><em class="acao">abrir</em></button>
+      </div>
+      <div class="painel-codigo">
+        <div id="pistas-status">📜 Pistas encontradas: <strong id="pistas-count">0</strong>/3</div>
+        <div class="entrada-codigo">
+          <input type="text" id="input-codigo" maxlength="3" placeholder="___" inputmode="numeric" autocomplete="off">
+          <button id="btn-tentar-codigo" class="btn">🔓 Tentar fechadura</button>
+        </div>
+        <p id="msg-codigo" class="msg"></p>
+      </div>
+    </section>
+
+    <!-- SALA 2 — O ENIGMA DO GUARDIÃO -->
+    <section id="sala-2" class="tela sala">
+      <h2>Sala 2 — O Enigma do Guardião</h2>
+      <p class="objetivo">🗿 Clique na estátua para ouvir a charada. Depois <strong>digite</strong> a resposta certa.</p>
+      <div class="cena">
+        <button class="objeto grande" data-obj="estatua">🗿<span>Estátua do Guardião</span><em class="acao">falar</em></button>
+        <button class="objeto" data-obj="placa">🪦<span>Placa gasta</span><em class="acao">examinar</em></button>
+        <button class="objeto porta" data-obj="porta2">🚪<span>Passagem</span><em class="acao">abrir</em></button>
+      </div>
+      <div class="pergunta-box">
+        <p class="pergunta" id="texto-charada">“Clique na estátua para revelar minha charada...”</p>
+        <div class="entrada-resposta">
+          <input type="text" id="input-resposta" placeholder="Digite a resposta..." autocomplete="off">
+          <button id="btn-responder" class="btn">Responder</button>
+        </div>
+        <p id="msg-pergunta" class="msg"></p>
+      </div>
+    </section>
+
+    <!-- SALA 3 — A CHAVE PERDIDA -->
+    <section id="sala-3" class="tela sala">
+      <h2>Sala 3 — A Chave Perdida</h2>
+      <p class="objetivo">🗝️ Vasculhe cada objeto clicável. A <strong>chave de ferro</strong> vai sozinha para o inventário.</p>
+      <div class="cena">
+        <button class="objeto" data-esconderijo="bau">🧰<span>Baú</span><em class="acao">abrir</em></button>
+        <button class="objeto" data-esconderijo="barril">🛢️<span>Barril</span><em class="acao">abrir</em></button>
+        <button class="objeto" data-esconderijo="caixa">📦<span>Caixa</span><em class="acao">abrir</em></button>
+        <button class="objeto" data-esconderijo="vaso">🏺<span>Vaso</span><em class="acao">examinar</em></button>
+        <button class="objeto" data-esconderijo="esqueleto">🦴<span>Esqueleto</span><em class="acao">revirar</em></button>
+        <button class="objeto" data-esconderijo="estante">📚<span>Estante</span><em class="acao">examinar</em></button>
+      </div>
+      <p id="msg-objeto" class="msg"></p>
+    </section>
+
+    <!-- SALA 4 — A FUGA -->
+    <section id="sala-4" class="tela sala">
+      <h2>Sala 4 — A Fuga</h2>
+      <p class="objetivo">🚪 Clique na <strong>Grande Porta</strong> com a chave de ferro <strong>selecionada no inventário</strong>.</p>
+      <div class="cena coluna">
+        <div class="portao-final">⛩️</div>
+        <button class="porta-final" id="porta-final">🔒 GRANDE PORTA TRANCADA<span class="sub">clique para tentar abrir</span></button>
+        <button id="btn-usar-chave" class="btn-grande">🗝️ Usar chave selecionada</button>
+      </div>
+      <p id="msg-final" class="msg"></p>
+    </section>
+
+    <!-- TELA FINAL DE VITÓRIA -->
+    <section id="tela-vitoria" class="tela">
+      <h2>🏆 VOCÊ ESCAPOU! 🏆</h2>
+      <p class="historia">A grande porta range... a luz do amanhecer invade o corredor.<br>As correntes ficam para trás. Você está <strong>LIVRE</strong>!</p>
+      <div class="trofeu">🗝️ ⛓️ 🕯️ 📜</div>
+      <p id="tempo-final" class="tempo-final"></p>
+      <p id="resumo-final" class="resumo"></p>
+      <button id="btn-jogar-novamente" class="btn-grande">🔄 Jogar Novamente</button>
+    </section>
+  </main>
+
+  <!-- Navegação entre salas (bloqueada até completar cada etapa) -->
+  <nav id="navegacao">
+    <button id="btn-voltar" class="btn-nav">⬅ Voltar</button>
+    <button id="btn-reiniciar" class="btn-nav">🔄 Reiniciar</button>
+    <button id="btn-avancar" class="btn-nav">Avançar ➡</button>
+  </nav>
+
+  <!-- Modal de inspeção: pistas, enigmas e opções -->
+  <div id="modal" class="modal escondido">
+    <div class="modal-conteudo">
+      <span id="modal-fechar">&times;</span>
+      <h3 id="modal-titulo"></h3>
+      <p id="modal-texto"></p>
+      <button id="modal-ok" class="btn">Fechar</button>
+    </div>
+  </div>
+
+  <footer><p>🕸️ A Masmorra Sombria — index.html + style.css + script.js 🕸️</p></footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
